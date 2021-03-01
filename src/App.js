@@ -23,59 +23,40 @@ const AuthStateApp = () => {
     const [errorMessage, setErrorMessage] = React.useState();
        
     React.useEffect(() => {
+      console.log(authState);
         return onAuthUIStateChange((nextAuthState, authData) => {
             setAuthState(nextAuthState);
             setUser(authData);
+            console.log('authState :-- ',authState)
         });
     }, []);
 
     const signUp = (event) => {
-      if(email==''){
-        setErrorMessage("Email Cant Be Null");
-        setAuthState(AuthState.SignUp);
-      }
-      else{
-       try {
-       
-      const { user } =  Auth.signUp({username, password, attributes: {email}}).then( data => {
-        setClientId(data.user.pool.clientId)
-        console.log("data",data)
+      event.preventDefault();
+      const { user1 } =  Auth.signUp({username, password, attributes: {email}}).then( data => {
+        setClientId(data.userSub)
+        console.log("data",data.userSub)
         setUser(user)   
          setAuthState(AuthState.ConfirmSignUp)
         return Auth.currentUserPoolUser( );
     } ).catch(err => setErrorMessage(err.message));
-      }catch(error){
-        console.log('error signing up:', error);
-      } 
-      }
     }
 
-    const confirmSignUp = (event) => {
-      console.log('code :-- ',authCode)
-      Auth.confirmSignUp(username, authCode).then( data => {
-        console.log("currentUserPoolUser",Auth.currentUserPoolUser( ))
-        console.log("currentUserInfo",Auth.currentUserInfo)
-        console.log("currentUserCredentials",Auth.currentUserCredentials)
-        console.log("data",data)
-        return Auth.currentUserPoolUser( );
-    } )
-    .then( user => {
-        console.log(user);
-        setUser(user)
-      console.log("User",user)
-      setAuthState(AuthState.SignIn);
-        API.post('userservices','/createusers',{
-        body:{
-          id:clientId,
-  firstname:firstname,
-  lastname:lastname,
-  username:username,
-  contactno:phonenumber
-        }
-      })  
-    } ).catch(err => this.setError({errMsg: err.message})) ;
-      
-    }
+ const confirmSignUp = (event) => {
+ console.log('code :-- ',authCode)
+ const { user1 }=Auth.confirmSignUp(username, authCode);
+ setUser(user1)
+ setAuthState(AuthState.SignIn);
+  API.post('userservices','/createusers',{
+   body:{
+    id:clientId,
+    firstname:firstname,
+    lastname:lastname,
+    username:username,
+    contactno:phonenumber
+   }
+ })
+}
 
     const signIn = (event) => {
       event.preventDefault();
@@ -233,5 +214,7 @@ const AuthStateApp = () => {
           </div>
       );
     }
+    
 }
+console.log("AuthState",AuthState)
 export default AuthStateApp;
